@@ -60,11 +60,21 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
 
 world = {};
 
+const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
+let color_i = 0;
+
+function getNextColor() {
+    color = colors[color_i];
+    color_i = (color_i + 1) % (colors.length);
+    return color;
+}
+
 //XXX: TODO Make this prettier!
+// Made circles thinner and rainbow!
 function drawCircle(context,entity) {
     with(context) {
         beginPath();              
-        lineWidth = 3;
+        lineWidth = 1;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
@@ -143,7 +153,7 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-    sendJSONXMLHTTPRequest(`http://127.0.0.1:5000/entity/${entity}`, data, (d) => {
+    sendJSONXMLHTTPRequest(`http://${window.location.host}/entity/${entity}`, data, (d) => {
         world[entity] = d;
     });
 }
@@ -253,16 +263,17 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
+// Made circles thinner and rainbow!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour':getNextColor()});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour':getNextColor()});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
+    addEntityWithoutName({'x':x,'y':y,'colour':getNextColor(),
                           'radius':10});
 });
 
@@ -274,15 +285,13 @@ function update() {
         world = JSON.parse(event.target.responseText);
         drawNextFrame();
     }
-    req.open("GET", "http://127.0.0.1:5000/world");
+    req.open("GET", `http://${window.location.host}/world`);
     req.send();
     drawFrame();
 }
 
 // 30 frames per second
 setInterval( update, 1000/30.0);
-
-
 
     </script>
 </body>
